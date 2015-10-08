@@ -284,7 +284,7 @@ int main(int argc, char *argv[])
   char       *endptr = NULL;
 
   if (argc < 3) {
-    fprintf(stdout, "multiwalk2c ver. %s, wegorz (Z.Kempczynski@marton.pl), GNU GPL License v.2\n\n", VERSION);
+    fprintf(stdout, "multiwalk2c ver. %s, wegorz76@gmail.com, GNU GPL License v.2\n\n", VERSION);
     fprintf(stdout, "Usage:   multiwalk2c -f agentsfile [options]\n\n");
     fprintf(stdout, "options: \n");
     fprintf(stdout, "\t-s stack_rlimit  (stack rlimit per thread in kb, default %d kb)\n", STACK_RLIMIT >> 10);

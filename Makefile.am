@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS	=	foreign
-INCLUDES 		= 	-Wall -Werror
+INCLUDES 		= 	-Wall 
 
 # ==========
 bin_PROGRAMS		= 	multiwalk2c
