@@ -1,0 +1,2 @@
+localhost:public
+zaphod:public

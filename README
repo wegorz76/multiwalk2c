@@ -1,0 +1,87 @@
+multiwalk2c
+===========
+
+multiwalk2c is a multi-threaded SNMP scanner. It is modified version of snmpbulkwalk. 
+It can scan agents listed in special agents file, write to single / many output files 
+and traverse different parts of mib tree in one thread. 
+
+I wrote this program because I needed application to scan simultanously many snmp
+agents (like cable modems). Of course I could run many snmpbulkwalk instances 
+in one time but it is heavy load solution. I've found great mass scanner - 
+braa (http://s-tech.elsat.net.pl/braa/) which uses numerical mib representation.
+As I prefer string mib representation (like in snmpbulkwalk) I had to write such
+a tool myself. File(s) which multiwalk2c will output can be easily parsed using
+Perl, awk etc.
+
+Usage:
+------
+multiwalk2c -f agents.wlk [options]
+
+multiwalk2c scans all agents found in special agents.wlk file. This file has
+one line agent:community syntax. See example file agents.wlk in the package.
+You can scan number of agents which is limited to the variable PTHREAD_THREADS_MAX.
+In my system this is 16384, which is really great number. If you're output context
+is multiple output each agent will write to its own file. 
+
+Possible options:
+-s stack_rlimit	   - stack rlimit per thread in kb. Default stack size for process/thread
+		     is about 8192 kb (ulimit -s) in many GNU/Linux distros. 
+		     multiwalk2c changes soft limit to 512 kb to avoid consuming the whole
+                     address space (which results "Resource temporary unavailable" message error).
+-T total_timeout   - timeout in seconds. After that all threads are finished and
+                     multiwalk2c exits.
+-t timeout         - agent response timeout in seconds.
+-r retries         - agent retries.
+-o output          - output filename or directory. 
+                     
+		     In single file output contexts (multi file output = -m 0)
+                     multiwalk2c can create PTHREAD_THREADS_MAX threads which write
+                     to one single file. Some agents can response very slowly 
+                     (what can't be acceptable sometimes - for example if you need
+                      to feed rrd files every 5 minuts) and scanning will be stopped
+                     after total_timeout. Your output parser has to know which agents
+                     haven't be scanned to the end. Use then -e 1, which write 
+                     'agent::=== END ===' to the output file.
+
+		     In multi file output context (multi file output = -m 1) 
+		     multiwalk2c will create separate files in directory 'output'.
+		     Files have names 'agent.mwalk.part' (scanning agent is not complete
+                     yet) and 'agent.mwalk' (agent was scanned successfully). 
+		     As you see suffix .part describe if an output file is complete or not.
+		     (Your management system can check output directory and analyze 
+                     agents output files which are complete)
+		     One problem you can discover is max open files limit (see ulimit -n)
+		     if number of agents > open files limit). 
+                     
+-m multi_output      Controls if an output is single file output context (if you don't
+		     specify default -m 0 is assumed) or multi file output (-m 1).
+		     See '-o output' above what kind of output you'll get.
+
+-n nice              Nice level - (default 20) if you don't want to kill you os leave it
+                     untouched - see 'man renice', 'man getpriority'. 
+
+-e endsignature      Controls if to output will be write signature 'agent::=== END ==='.
+		     This signature will be write only if agent will return all requested
+                     mibs. In multi file output you don't need output signature, because
+                     not completed scans has suffix .part in output directory.
+		     Value endsignature can be 0 (don't write signature) or 1 (write it).
+
+-O output_type       Output type in snmpbulkwalk style (see snmpbulkwalk -O args).
+
+-L miblist           Mibs to walk, ex. -L system,if,docsIfCmObjects
+
+-C r<NUM>|n<NUM>     Set r-repeaters to <NUM>, n-nonrepeaters to <NUM>.
+
+
+Author
+------
+Zbigniew M. Kempczynski (wegorz), Z.Kempczynski@marton.pl
+
+License
+-------
+GNU GPL v.2, see COPYING file,
+
+Greetings
+---------
+Net-SNMP team - http://www.net-snmp.org
+

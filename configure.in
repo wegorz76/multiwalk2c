@@ -1,0 +1,47 @@
+AC_INIT(configure.in)
+AM_INIT_AUTOMAKE(multiwalk2c, 0.2)
+
+AC_PROG_CC
+AC_ISC_POSIX
+AM_PROG_CC_STDC
+AC_HEADER_STDC
+AC_PROG_MAKE_SET
+AM_CONFIG_HEADER(config.h)
+
+AC_STDC_HEADERS
+AC_HAVE_HEADERS(unistd.h)
+
+AC_MSG_RESULT([===========================================================
+*** Checking if your system has crypto library ***])
+AC_CHECK_LIB(crypto, CRYPTO_free,
+     crypto_lib="-lcrypto",
+     AC_MSG_WARN([
+*** no crypto library found ***])
+     crypto_lib=""
+)
+
+AC_MSG_RESULT([===========================================================
+*** Checking if your system support pthreads ***])
+AC_CHECK_HEADER(pthread.h,,
+     AC_MSG_ERROR([
+*** multiwalk2c require pthreads library ***
+]))
+
+AC_CHECK_LIB(pthread, pthread_create,,
+     AC_MSG_ERROR([
+*** pthreads headers found but linking against -lpthread failed ***]))
+
+
+AC_MSG_RESULT([===========================================================
+*** Checking if your system has NET-SNMP library installed ***])
+AC_CHECK_HEADER(net-snmp/net-snmp-config.h,,
+     AC_MSG_ERROR([
+*** multiwalk2c require NET-SNMP library ***
+You can download it from http://www.net-snmp.org
+]))
+
+AC_CHECK_LIB(netsnmp,snmp_open,,
+     AC_MSG_ERROR([
+*** netsnmp headers found but linking against -lnetsnmp failed ***]), -lpthread $crypto_lib)
+
+AC_OUTPUT([Makefile])
